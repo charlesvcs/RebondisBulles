@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rebondis Bulles">
+  <rect width="512" height="512" fill="#000000"/>
+  <g stroke="#f1f0ec" stroke-width="5" stroke-linecap="square" opacity="0.18">
+    <line x1="128" y1="200" x2="384" y2="200"/>
+    <line x1="168" y1="312" x2="344" y2="312"/>
+  </g>
+  <circle cx="200" cy="200" r="42" fill="#DA9781"/>
+  <circle cx="312" cy="200" r="42" fill="#7EC8A3"/>
+  <circle cx="200" cy="312" r="42" fill="#8CACD9"/>
+  <circle cx="312" cy="312" r="42" fill="#DAC581"/>
+</svg>

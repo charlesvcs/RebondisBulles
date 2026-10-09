@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rebondis Bulles — CharlesVCS</title>
+<meta name="description" content="Puzzle de glissade sur grille 16 × 16, jouable au doigt, avec solveur optimal intégré.">
+
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="Rebondis Bulles">
+<meta name="apple-mobile-web-app-title" content="Rebondis Bulles">
+
+<link rel="icon" type="image/svg+xml" href="icone.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="card">
+
+  <div class="entete-app">
+    <span class="nom">Rebondis Bulles</span>
+    <span class="partie">17 jetons</span>
+  </div>
+
+  <a class="back-link chrome" href="../portfolio/index.html">
+    <span class="link-mark" aria-hidden="true">◂</span>
+    <span>CharlesVCS</span>
+  </a>
+
+  <div class="chrome">
+    <h1 class="page-title">Rebondis Bulles</h1>
+    <p class="context">Puzzle de glissade 16 × 16 <span class="context-dim">/</span> jouable, solveur intégré</p>
+    <hr class="rule" aria-hidden="true">
+    <ul class="project-list">
+      <li class="project">
+        <h2 class="project-title">Mécanique</h2>
+        <p class="project-desc">Quatre bulles filent en ligne droite jusqu'au premier
+        obstacle — un mur, le bloc central, ou une autre bulle. Un jeton désigne la
+        bulle à poser et la case à atteindre ; elle doit s'y arrêter, pas seulement
+        y passer.</p>
+      </li>
+      <li class="project">
+        <h2 class="project-title">Modes</h2>
+        <p class="project-desc">Classique : 17 jetons sans remise, sans limite de
+        temps. Rapide : manches chronométrées à la minute, score en cadence (points
+        par minute). Duel : enchères à deux, en pair à pair local.</p>
+      </li>
+      <li class="project">
+        <h2 class="project-title">Solveur</h2>
+        <p class="project-desc">A* canonique dans un Web Worker, heuristique
+        admissible — l'optimal exact se révèle à la demande, jamais imposé.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="jeu">
+
+    <div class="bloc-etat">
+      <div class="modes" role="group" aria-label="Mode de jeu">
+        <button type="button" data-mode="classique" aria-pressed="true"><span class="link-mark" aria-hidden="true">▸</span><span>Classique</span></button>
+        <button type="button" data-mode="rapide" aria-pressed="false"><span class="link-mark" aria-hidden="true">▸</span><span>Rapide</span></button>
+        <button type="button" data-mode="duel" aria-pressed="false"><span class="link-mark" aria-hidden="true">▸</span><span>Duel</span></button>
+        <button type="button" id="son" class="btn-son" aria-label="Réglage du son">Muet</button>
+      </div>
+      <div id="duel" class="duel" hidden>
+        <div id="duel-appairage">
+          <div class="actions">
+            <button type="button" id="duel-creer">Créer une partie</button>
+            <button type="button" id="duel-rejoindre">Rejoindre</button>
+          </div>
+          <label class="champ" id="duel-champ-sortie" hidden>
+            <span id="duel-libelle-sortie">À transmettre à l'autre joueur</span>
+            <input id="duel-sortie" type="text" readonly>
+          </label>
+          <div class="actions" id="duel-actions-sortie" hidden>
+            <button type="button" id="duel-copier">Copier</button>
+          </div>
+          <label class="champ" id="duel-champ-entree" hidden>
+            <span id="duel-libelle-entree">Colle le code reçu</span>
+            <input id="duel-entree" type="text" autocapitalize="off" autocorrect="off" spellcheck="false">
+          </label>
+          <div class="actions" id="duel-actions-entree" hidden>
+            <button type="button" id="duel-valider" class="btn-principal">Valider</button>
+          </div>
+        </div>
+
+        <div id="duel-partie" hidden>
+          <div class="ligne">
+            <span id="duel-etat">En attente</span>
+            <span class="valeur"><span id="duel-score-moi">0</span> — <span id="duel-score-lui">0</span></span>
+          </div>
+          <div class="actions" id="duel-annonce" hidden>
+            <button type="button" id="duel-moins">−</button>
+            <span id="duel-valeur" class="duel-valeur">4</span>
+            <button type="button" id="duel-plus">+</button>
+            <button type="button" id="duel-annoncer" class="btn-principal">Annoncer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="jeton-affiche">
+        <span id="vignette" class="vignette" aria-hidden="true"></span>
+        <span id="libelle-jeton" class="libelle"></span>
+      </div>
+      <div id="compteurs" class="compteurs" data-mode="classique">
+        <div class="compteur"><span id="manche" class="valeur">1</span><span class="label">manche</span></div>
+        <div class="compteur"><span id="coups" class="valeur">0</span><span class="label">coups</span></div>
+        <div class="compteur"><span id="objectif" class="valeur">…</span><span class="label">objectif</span></div>
+        <div class="compteur pour-classique"><span id="temps" class="valeur">00:00</span><span class="label">temps</span></div>
+        <div class="compteur pour-rapide"><span id="restant" class="valeur">60 s</span><span class="label">restant</span></div>
+        <div class="compteur pour-rapide"><span id="points" class="valeur">0.00</span><span class="label">points</span></div>
+        <div class="compteur pour-rapide"><span id="taux" class="valeur">0.00</span><span class="label">pts/min</span></div>
+      </div>
+    </div>
+
+    <div class="zone-plateau">
+      <canvas id="plateau" class="plateau" role="img" aria-label="Plateau 16 par 16"></canvas>
+    </div>
+
+    <div class="bloc-commandes">
+      <p id="message" class="message"></p>
+      <div id="recap" class="recap" hidden></div>
+
+      <div class="ligne ligne-selection" style="margin-top: 24px;">
+        <span>Bulle sélectionnée</span>
+        <span id="selection" class="valeur">Rouge</span>
+      </div>
+
+      <div class="pave">
+        <span class="vide"></span>
+        <button type="button" data-direction="haut" aria-label="Lancer vers le haut"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M12 5l-6 6M12 5l6 6"/></svg></button>
+        <span class="vide"></span>
+        <button type="button" data-direction="gauche" aria-label="Lancer vers la gauche"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M12 5l-6 6M12 5l6 6"/></svg></button>
+        <button type="button" data-direction="bas" aria-label="Lancer vers le bas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M12 5l-6 6M12 5l6 6"/></svg></button>
+        <button type="button" data-direction="droite" aria-label="Lancer vers la droite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M12 5l-6 6M12 5l6 6"/></svg></button>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="annuler">Annuler</button>
+        <button type="button" id="rejouer">Rejouer</button>
+        <button type="button" id="solution">Montrer la solution</button>
+        <button type="button" id="terminer" hidden>Terminer la partie</button>
+        <button type="button" id="suivante" class="btn-principal">Manche suivante</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bloc-technique chrome">
+    <div class="ligne"><span>Stack</span><span class="valeur">HTML, CSS, JavaScript</span></div>
+    <div class="ligne"><span>Moteur</span><span class="valeur">glissade et collisions, sans dépendance</span></div>
+    <div class="ligne"><span>Plateau</span><span class="valeur" id="graine">—</span></div>
+    <div class="ligne"><span>Modes</span><span class="valeur">classique, rapide, duel local</span></div>
+    <div class="ligne"><span>Duel</span><span class="valeur">WebRTC pair à pair, sans serveur</span></div>
+    <div class="ligne"><span>Son</span><span class="valeur">synthèse Web Audio, aucun fichier</span></div>
+    <div class="ligne"><span>Rendu</span><span class="valeur">canvas 192 px, pixel art animé</span></div>
+    <div class="ligne"><span>Solveur</span><span class="valeur">A* canonique, heuristique relâchée</span></div>
+    <div class="ligne"><span>Calcul</span><span class="valeur">Web Worker, optimal exact ≤ 13 coups</span></div>
+    <div class="ligne"><span>Grille</span><span class="valeur">16 × 16, 17 coins, 17 jetons</span></div>
+    <div class="ligne"><span>Hors ligne</span><span class="valeur">PWA installable, service worker</span></div>
+    <div class="ligne"><span>Source</span><span class="valeur"><a href="#">github.com/charlesvcs/…</a></span></div>
+  </div>
+
+  <footer class="footer chrome">
+    <div class="footer-contenu">
+      <span>© 2026 — CharlesVCS</span>
+      <a href="../portfolio/about.html">About</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="moteur.js"></script>
+<script src="reseau.js"></script>
+<script src="sons.js"></script>
+<script src="plateau.js"></script>
+<script src="interface.js"></script>
+</body>
+</html>

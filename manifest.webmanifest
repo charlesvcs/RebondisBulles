@@ -1,0 +1,17 @@
+{
+  "name": "Rebondis Bulles",
+  "short_name": "Bulles",
+  "description": "Puzzle de glissade sur grille 16 × 16, jouable au doigt, avec solveur optimal intégré.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "lang": "fr",
+  "categories": ["games", "puzzle"],
+  "icons": [
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icone-masquable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

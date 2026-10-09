@@ -1,0 +1,489 @@
+/* =========================================================================
+   REBONDIS BULLES — direction "The Bordered Readout" (identique au
+   portfolio CharlesVCS : fond noir, carte à liseré + deux repères de coin,
+   un seul accent, aucun radius, aucune ombre). Polices auto-hébergées,
+   mêmes familles que le reste du site (Bricolage Grotesque, JetBrains Mono).
+   ========================================================================= */
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('polices/bricolage-grotesque-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('polices/jetbrains-mono-latin.woff2') format('woff2');
+}
+
+:root {
+  --bg: #000000;
+  --ink: #f1f0ec;
+  --ink-soft: #8d8d93;
+  --accent: #eb3f82;
+  --accent-deep: #ff6fa4;
+  --border: color-mix(in srgb, var(--ink) 18%, transparent);
+  --rule: color-mix(in srgb, var(--accent) 55%, transparent);
+  --focus: var(--accent-deep);
+
+  /* Alias littéraux : plateau.js lit ces variables via getComputedStyle,
+     qui ne résout pas un var() imbriqué — valeurs dupliquées à dessein,
+     jamais réécrites en référence aux tokens ci-dessus. */
+  --fond: #000000;
+  --carte: #16161c;
+  --brume: #8d8d93;
+  --texte: #f1f0ec;
+
+  /* Pièces de jeu : extension contrôlée, jamais pour l'interface elle-même
+     (règle identique au reste du site : un seul accent au repos). Teintes
+     relevées pour rester lisibles sur fond noir plutôt que sur fond clair. */
+  --jeu-rouge: #DA9781;
+  --jeu-vert: #7EC8A3;
+  --jeu-bleu: #8CACD9;
+  --jeu-jaune: #DAC581;
+
+  --font-sans: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --display-size-page: clamp(2rem, 6vw, 2.75rem);
+  --label-size: clamp(0.85rem, 1.6vw, 0.95rem);
+  --label-size-title: 0.95rem;
+  --label-size-sm: 0.85rem;
+  --label-size-xs: 0.75rem;
+
+  --max-width: 1100px;
+  --gap-grid: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: auto; color-scheme: dark; }
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 0;
+}
+
+::selection { background-color: var(--accent); color: #000; }
+
+input { caret-color: var(--accent-deep); }
+
+/* ------------------------------------------------------ LA CARTE --- */
+/* Même grammaire que le reste du site : un liseré, deux repères de coin
+   opposés (haut-gauche / bas-droite), tout le reste reste plat. */
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: var(--max-width);
+  border: 1px solid var(--border);
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.25rem, 4vw, 2.75rem);
+}
+
+.card::before, .card::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  animation: repere-coin 0.5s ease 0.75s forwards;
+}
+.card::before { top: -7px; left: -7px; border-top: 1px solid var(--accent); border-left: 1px solid var(--accent); }
+.card::after  { bottom: -7px; right: -7px; border-bottom: 1px solid var(--accent); border-right: 1px solid var(--accent); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.back-link .link-mark { color: var(--ink-soft); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease; }
+.back-link:hover, .back-link:focus-visible { color: var(--accent-deep); }
+.back-link:hover .link-mark, .back-link:focus-visible .link-mark { color: var(--accent-deep); transform: translateX(-0.2em); }
+
+.page-title {
+  margin: 1.4rem 0 0;
+  font-size: var(--display-size-page);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: lever 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.context {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--label-size);
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: lever 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
+}
+.context-dim { color: color-mix(in srgb, var(--ink-soft) 55%, transparent); padding: 0 0.35em; }
+
+.rule {
+  width: 0%;
+  height: 1px;
+  margin: 1.9rem 0 1.6rem;
+  border: 0;
+  background: var(--rule);
+  animation: etendre 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+@keyframes lever { to { opacity: 1; transform: translateY(0); } }
+@keyframes etendre { to { width: 100%; } }
+@keyframes repere-coin { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-title, .context { animation: none; opacity: 1; transform: none; }
+  .rule { animation: none; width: 100%; }
+  .card::before, .card::after { animation: none; opacity: 1; }
+  .link-mark, .modes button::after { transition: none; }
+}
+
+/* --------------------------------------------------- LE PITCH --- */
+
+.project-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+.project-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-title);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--accent-deep);
+}
+.project-desc {
+  max-width: 62ch;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------ LE JEU --- */
+
+.jeu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--gap-grid);
+  align-items: start;
+  margin-top: 2.5rem;
+}
+
+.zone-plateau { grid-column: 1; grid-row: 1 / span 2; max-width: 620px; position: relative; }
+.bloc-etat { grid-column: 2; grid-row: 1; }
+.bloc-commandes { grid-column: 2; grid-row: 2; }
+
+.zone-plateau::before, .zone-plateau::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  opacity: 0;
+  animation: repere-coin 0.5s ease 0.9s forwards;
+}
+.zone-plateau::before { top: -5px; left: -5px; border-top: 1px solid var(--accent); border-left: 1px solid var(--accent); }
+.zone-plateau::after  { bottom: -5px; right: -5px; border-bottom: 1px solid var(--accent); border-right: 1px solid var(--accent); }
+
+.plateau {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  background-color: var(--fond);
+  border: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;          /* le glissement pilote le jeu, pas le défilement */
+
+  /* Le canvas fait 192 px de côté en interne : agrandi sans lissage, chaque
+     pixel reste franc. C'est le seul endroit du site où l'image bouge. */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  color: var(--ink-soft);
+}
+.ligne + .ligne { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.ligne .valeur { color: var(--ink); text-align: right; }
+.ligne .valeur a { text-decoration: underline; text-decoration-color: var(--border); }
+.ligne .valeur a:hover, .ligne .valeur a:focus-visible { color: var(--accent-deep); text-decoration-color: var(--accent-deep); }
+
+.separateur { height: 1px; background-color: var(--border); margin: 16px 0; }
+
+.modes { display: flex; align-items: center; gap: 1rem; margin-bottom: 24px; flex-wrap: wrap; }
+
+.modes button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  color: var(--ink-soft);
+  padding: 0 0 0.2em;
+  cursor: pointer;
+  position: relative;
+}
+.modes button .link-mark {
+  font-size: 0.8em;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-0.4em);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+.modes button::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--accent-deep);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modes button:hover, .modes button:focus-visible { color: var(--accent-deep); }
+.modes button:hover .link-mark, .modes button:focus-visible .link-mark,
+.modes button.actif .link-mark { opacity: 1; transform: translateX(0); }
+.modes button:hover::after, .modes button:focus-visible::after,
+.modes button.actif::after { transform: scaleX(1); }
+.modes button.actif { color: var(--ink); }
+.modes button.actif:hover { color: var(--accent-deep); }
+
+.modes .btn-son {
+  margin-left: auto;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border);
+}
+
+.jeton-affiche { display: flex; align-items: center; gap: 12px; }
+.jeton-affiche .vignette { flex: 0 0 32px; width: 32px; height: 32px; }
+.jeton-affiche .vignette svg { width: 100%; height: 100%; display: block; }
+.jeton-affiche .libelle { font-family: var(--font-mono); font-size: var(--label-size-sm); color: var(--ink); }
+
+.compteurs { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.compteur { flex: 1 1 60px; min-width: 0; }
+.compteurs[data-mode="classique"] .pour-rapide,
+.compteurs[data-mode="rapide"] .pour-classique { display: none; }
+.compteur .valeur {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent-deep);
+}
+.compteur .label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-xs);
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.message {
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.message.resolu { color: var(--ink); }
+
+.recap { margin-top: 24px; }
+
+.duel { margin-bottom: 24px; }
+.duel .champ { margin-top: 16px; }
+.duel .actions { margin-top: 12px; }
+.duel input[readonly] { color: var(--ink-soft); }
+
+.duel-valeur {
+  flex: 0 0 auto;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--accent-deep);
+  min-width: 32px;
+  text-align: center;
+}
+
+#duel-moins, #duel-plus { flex: 0 0 auto; min-width: 44px; }
+#duel-etat { font-family: var(--font-mono); font-size: var(--label-size-xs); color: var(--ink-soft); }
+
+.champ { display: flex; flex-direction: column; gap: 8px; }
+.champ span { font-family: var(--font-mono); font-size: var(--label-size-sm); color: var(--ink-soft); }
+.champ input {
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  color: var(--ink);
+  background-color: transparent;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  width: 100%;
+}
+
+/* -------------------------------------------------------- BOUTONS --- */
+
+button {
+  font-family: var(--font-mono);
+  font-size: var(--label-size-sm);
+  background-color: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:hover:not(:disabled) { color: var(--accent-deep); border-color: var(--accent-deep); }
+button:disabled { opacity: 0.4; cursor: default; }
+
+.btn-principal {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.btn-principal:hover:not(:disabled) { color: var(--accent-deep); border-color: var(--accent-deep); }
+.btn-principal:disabled { border-color: var(--border); }
+
+/* Croix directionnelle : souris et clavier seulement. Sur écran tactile,
+   la commande est le glissement du doigt sur le plateau. */
+.pave {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 200px;
+  margin: 24px auto 0;
+}
+.pave .vide { visibility: hidden; }
+.pave button { padding: 12px 0; }
+.pave button svg {
+  display: block;
+  margin: 0 auto;
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pave button[data-direction="gauche"] svg { transform: rotate(-90deg); }
+.pave button[data-direction="bas"] svg { transform: rotate(180deg); }
+.pave button[data-direction="droite"] svg { transform: rotate(90deg); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.actions button { flex: 1 1 auto; }
+.actions .btn-principal { flex: 1 1 100%; }
+
+/* ------------------------------------------------ BLOC TECHNIQUE --- */
+
+.bloc-technique { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); max-width: 500px; }
+
+/* -------------------------------------------------------- FOOTER --- */
+
+.footer { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.footer-contenu {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--label-size-xs);
+  color: var(--ink-soft);
+}
+.footer-contenu a { text-decoration: underline; text-decoration-color: var(--border); }
+.footer-contenu a:hover, .footer-contenu a:focus-visible { color: var(--accent-deep); text-decoration-color: var(--accent-deep); }
+
+/* ================================================= TABLETTE & MOBILE === */
+
+@media (max-width: 900px) {
+  .jeu { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 24px; }
+
+  /* État au-dessus du plateau, commandes juste en dessous : tout reste
+     dans la zone du pouce, rien n'est renvoyé en bas de page. */
+  .bloc-etat      { grid-column: 1; grid-row: 1; }
+  .zone-plateau   { grid-column: 1; grid-row: 2; max-width: 100%; }
+  .bloc-commandes { grid-column: 1; grid-row: 3; }
+
+  /* Le plateau ne dépasse jamais la hauteur disponible, mais reste jouable :
+     en paysage sur téléphone (hauteur d'écran réduite), une simple soustraction
+     peut tomber sous la taille lisible — le plancher de 220px fait alors déborder
+     la page verticalement plutôt que de rendre un plateau inutilisable. */
+  .plateau { max-width: max(220px, calc(100vh - 340px)); max-width: max(220px, calc(100svh - 340px)); margin: 0 auto; }
+
+  .jeton-affiche .libelle { font-size: var(--label-size-xs); }
+  .compteurs { margin-top: 16px; gap: 12px; }
+  .compteur .valeur { font-size: 18px; }
+  .compteur .label { font-size: var(--label-size-xs); }
+  .message { font-size: var(--label-size-xs); }
+  .actions { margin-top: 16px; }
+  .actions button { min-height: 48px; flex: 1 1 30%; }
+}
+
+/* Écran tactile : la croix et l'indicateur de sélection disparaissent. */
+@media (pointer: coarse) {
+  .pave, .ligne-selection { display: none; }
+
+  /* Safari iOS zoome la page au focus sur tout champ texte affiché sous 16px —
+     les champs d'appairage du duel passent donc à 16px ici seulement, pour ne
+     pas changer leur taille sur pointeur fin (souris/trackpad). */
+  .champ input { font-size: 16px; }
+}
+
+@media (max-width: 420px) {
+  .modes { gap: 0.6rem; }
+  .modes .btn-son { padding-left: 0.6rem; }
+}
+
+/* ============================================ MODE APPLICATION (PWA) === */
+
+@media (display-mode: standalone) {
+  .chrome { display: none; }
+  body { padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom); }
+  .entete-app { display: flex; }
+  .jeu { margin-top: 1rem; }
+}
+
+.entete-app { display: none; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+.entete-app .nom { font-family: var(--font-sans); font-size: 17px; font-weight: 650; color: var(--ink); }
+.entete-app .partie { font-family: var(--font-mono); font-size: var(--label-size-xs); color: var(--ink-soft); }
